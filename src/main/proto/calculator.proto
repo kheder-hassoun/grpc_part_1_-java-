@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+service CalculatorService {
+  rpc Add (TwoNumbers) returns (CalculationResult);
+  rpc Multiply (TwoNumbers) returns (CalculationResult);
+}
+
+message TwoNumbers {
+  int32 num1 = 1;
+  int32 num2 = 2;
+}
+
+message CalculationResult {
+  int32 result = 1;
+}
