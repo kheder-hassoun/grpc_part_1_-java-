@@ -1,4 +1,7 @@
 syntax = "proto3";
+package calculator;
+option java_package = "proto.generated";
+option java_multiple_files = true;
 
 service CalculatorService {
   rpc Add (TwoNumbers) returns (CalculationResult);
