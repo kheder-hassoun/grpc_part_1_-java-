@@ -18,8 +18,8 @@ public class Main {
 
     public static void main(String[] args) {
         // Create channels to connect to the add and multiply services
-        ManagedChannel addChannel = ManagedChannelBuilder.forAddress("localhost", 7000).usePlaintext().build();
-        ManagedChannel multiplyChannel = ManagedChannelBuilder.forAddress("localhost", 6060).usePlaintext().build();
+        ManagedChannel addChannel = ManagedChannelBuilder.forAddress("localhost", 50051).usePlaintext().build();
+        ManagedChannel multiplyChannel = ManagedChannelBuilder.forAddress("localhost", 50052).usePlaintext().build();
 
         // Create blocking stubs for both channels
         CalculatorServiceGrpc.CalculatorServiceBlockingStub addServiceStub = CalculatorServiceGrpc.newBlockingStub(addChannel);
@@ -64,7 +64,7 @@ public class Main {
                     break;
 
                 case 2:
-                    System.out.println(ANSI_GREEN + "\nCalling Multiply Service on localhost:5000..." + ANSI_RESET);
+                    System.out.println(ANSI_GREEN + "\nCalling Multiply Service on localhost:50052..." + ANSI_RESET);
                     try {
                         CalculationResult multiplyResponse = multiplyServiceStub.multiply(request);
                         System.out.println(ANSI_YELLOW + "Multiplication result: " + ANSI_RESET + multiplyResponse.getResult());
