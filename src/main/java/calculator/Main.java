@@ -3,9 +3,7 @@ package calculator;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
-import proto.generated.CalculatorServiceGrpc;
-import proto.generated.CalculationResult;
-import proto.generated.TwoNumbers;
+import proto.generated.*;
 
 import java.util.Scanner;
 
@@ -19,9 +17,9 @@ public class Main {
     private static final String ANSI_CYAN = "\u001B[36m";
 
     public static void main(String[] args) {
-        // Create channels to connect to the second and third services
-        ManagedChannel addChannel = ManagedChannelBuilder.forAddress("localhost", 50051).usePlaintext().build();
-        ManagedChannel multiplyChannel = ManagedChannelBuilder.forAddress("localhost", 5000).usePlaintext().build();
+        // Create channels to connect to the add and multiply services
+        ManagedChannel addChannel = ManagedChannelBuilder.forAddress("localhost", 7000).usePlaintext().build();
+        ManagedChannel multiplyChannel = ManagedChannelBuilder.forAddress("localhost", 6060).usePlaintext().build();
 
         // Create blocking stubs for both channels
         CalculatorServiceGrpc.CalculatorServiceBlockingStub addServiceStub = CalculatorServiceGrpc.newBlockingStub(addChannel);
@@ -32,15 +30,15 @@ public class Main {
         boolean keepRunning = true;
 
         System.out.println(ANSI_CYAN + "\tWelcome to the Interactive gRPC Calculator Console App!" + ANSI_RESET);
+
         // Prompt user for numbers
         System.out.println(ANSI_YELLOW + "\n\tEnter the first number:" + ANSI_RESET);
         num1 = scanner.nextInt();
         System.out.println(ANSI_YELLOW + "\tEnter the second number:" + ANSI_RESET);
         num2 = scanner.nextInt();
+
         // Main loop for user interaction
         while (keepRunning) {
-
-
             // Prepare the request object
             TwoNumbers request = TwoNumbers.newBuilder().setNum1(num1).setNum2(num2).build();
 
@@ -48,9 +46,10 @@ public class Main {
             System.out.println(ANSI_CYAN + "\n\tSelect an option:" + ANSI_RESET);
             System.out.println("\t1 - Perform Addition");
             System.out.println("\t2 - Perform Multiplication");
-            System.out.println("\t3 - Enter/Change Numbers");
-            System.out.println("\t4 - Clear Screen");
-            System.out.println("\t5 - Exit");
+            System.out.println("\t3 - View History");
+            System.out.println("\t4 - Enter/Change Numbers");
+            System.out.println("\t5 - Clear Screen");
+            System.out.println("\t6 - Exit");
 
             int choice = scanner.nextInt();
             switch (choice) {
@@ -75,18 +74,34 @@ public class Main {
                     break;
 
                 case 3:
+                    System.out.println(ANSI_GREEN + "\nFetching Operation History from Add Service..." + ANSI_RESET);
+                    try {
+                        HistoryRequest historyRequest = HistoryRequest.newBuilder().build();
+                        addServiceStub.getHistory(historyRequest).forEachRemaining(historyEntry -> {
+                            System.out.println(ANSI_YELLOW + "Operation: " + historyEntry.getOperation() +
+                                    ", Numbers: (" + historyEntry.getNum1() + ", " + historyEntry.getNum2() +
+                                    "), Result: " + historyEntry.getResult() + ANSI_RESET);
+                        });
+                    } catch (StatusRuntimeException e) {
+                        System.out.println(ANSI_RED + "Error fetching history: " + e.getStatus() + ANSI_RESET);
+                    }
+                    break;
+
+                case 4:
                     System.out.println(ANSI_CYAN + "\nYou chose to change the numbers." + ANSI_RESET);
                     // Prompt user for numbers
                     System.out.println(ANSI_YELLOW + "\nEnter the first number:" + ANSI_RESET);
                     num1 = scanner.nextInt();
                     System.out.println(ANSI_YELLOW + "Enter the second number:" + ANSI_RESET);
                     num2 = scanner.nextInt();
-                    break; // Loop will restart, asking for numbers again
-                case 4:
+                    break;
+
+                case 5:
                     System.out.print("\033[H\033[2J");
                     System.out.flush();
                     break;
-                case 5:
+
+                case 6:
                     keepRunning = false;
                     System.out.println(ANSI_GREEN + "Exiting the Calculator Console App. Goodbye!" + ANSI_RESET);
                     break;
